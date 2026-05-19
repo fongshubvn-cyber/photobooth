@@ -942,12 +942,6 @@ function showPayGate() {
   document.getElementById('pay-gate').classList.add('open');
   document.getElementById('pg-code-input').value = '';
   document.getElementById('pg-code-err').textContent = '';
-  const tabs = document.querySelectorAll('.pg-tab');
-  const panels = document.querySelectorAll('.pg-panel');
-  tabs.forEach(t => t.classList.remove('active'));
-  panels.forEach(p => p.classList.remove('active'));
-  tabs[0].classList.add('active');
-  document.getElementById('pp-code').classList.add('active');
 }
 
 function closePayGate() {
@@ -993,35 +987,14 @@ document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
   <div class="pg-box-wrap">
     <button class="pg-close" onclick="closePayGate()">✕</button>
     <div class="pg-box">
-      <div class="pg-title">Hoàn tất để nhận ảnh</div>
-      <div class="pg-sub">Chọn một trong hai cách bên dưới</div>
-      <div class="pg-tabs">
-        <button class="pg-tab active" onclick="switchPayTab('code',this)">Mã miễn phí</button>
-        <button class="pg-tab" onclick="switchPayTab('qr',this)">QR Chuyển khoản</button>
-      </div>
+      <div class="pg-title">Nhập mã để nhận ảnh</div>
+      <div class="pg-sub">Vui lòng nhập mã được cung cấp</div>
       <div class="pg-panel active" id="pp-code">
-        <input class="pg-input" id="pg-code-input" type="text" placeholder="Nhập mã miễn phí" maxlength="20"
+        <input class="pg-input" id="pg-code-input" type="text" placeholder="Nhập mã tại đây" maxlength="20"
           oninput="this.value=this.value.toUpperCase();document.getElementById('pg-code-err').textContent=''"
           onkeydown="if(event.key==='Enter')verifyCode()">
         <div class="pg-err" id="pg-code-err"></div>
-        <button class="pg-btn" onclick="verifyCode()">Xác nhận mã</button>
-      </div>
-      <div class="pg-panel" id="pp-qr">
-        <div class="pg-qr-wrap">
-          <div class="pg-qr">
-            <div class="pg-qr-placeholder">
-              <div style="font-size:42px;margin-bottom:6px">📱</div>
-              QR chuyển khoản<br>
-              <strong style="color:#333;font-size:13px">80.000 VNĐ</strong><br>
-              <span style="font-size:10px">(QR sẽ được cập nhật)</span>
-            </div>
-          </div>
-          <div class="pg-qr-info">
-            Quán của Thời Thanh Xuân · Đà Lạt<br>
-            80.000 VNĐ · Ảnh kỷ niệm
-          </div>
-          <button class="pg-btn" onclick="confirmPaid()">Tôi đã chuyển khoản ✓</button>
-        </div>
+        <button class="pg-btn" onclick="verifyCode()">Xác nhận</button>
       </div>
     </div>
   </div>

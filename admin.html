@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Quản lý Photobooth · QCTTX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --g1: #1B4332; --g2: #2D6A4F; --g3: #52B788;
+      --gold: #C9963A; --bg: #EDEAE3; --cream: #F5F0E8;
+    }
+    html, body { min-height: 100%; background: var(--bg); font-family: 'Be Vietnam Pro', sans-serif; color: var(--g1); }
+
+    /* ── PASSWORD ── */
+    #pass-screen {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; padding: 30px; z-index: 100;
+    }
+    #pass-screen.hidden { display: none; }
+    .pass-logo { width: 56px; height: 56px; border: 2px solid var(--g1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; opacity: .8; }
+    .pass-title { font-size: 20px; font-weight: 600; }
+    .pass-sub { font-size: 13px; color: rgba(27,67,50,.45); margin-bottom: 8px; }
+    .pass-input {
+      width: 100%; max-width: 280px; padding: 14px 18px; text-align: center;
+      background: white; border: 2px solid rgba(27,67,50,.18); border-radius: 14px;
+      font-family: inherit; font-size: 16px; letter-spacing: 3px; outline: none; color: var(--g1);
+    }
+    .pass-input:focus { border-color: var(--g2); }
+    .pass-err { font-size: 13px; color: #c0392b; min-height: 18px; }
+    .pass-btn {
+      width: 100%; max-width: 280px; padding: 14px; background: var(--g1); color: white;
+      border: none; border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer;
+    }
+    .pass-btn:hover { background: var(--g2); }
+
+    /* ── MAIN ── */
+    .main { max-width: 480px; margin: 0 auto; padding: 24px 18px 80px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .header-title { font-size: 17px; font-weight: 600; }
+    .logout-btn {
+      font-size: 12px; color: rgba(27,67,50,.5); background: none;
+      border: 1px solid rgba(27,67,50,.2); border-radius: 100px;
+      padding: 6px 14px; font-family: inherit; cursor: pointer;
+    }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+    .stat-card { background: white; border-radius: 14px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 8px rgba(27,67,50,.07); }
+    .stat-num { font-size: 28px; font-weight: 600; color: var(--g1); line-height: 1; }
+    .stat-label { font-size: 11px; color: rgba(27,67,50,.45); margin-top: 5px; }
+    .stat-card.s-used .stat-num { color: var(--gold); }
+    .stat-card.s-rem  .stat-num { color: var(--g3); }
+
+    /* Generate box */
+    .gen-box {
+      background: var(--g1); border-radius: 22px; padding: 24px 20px 20px;
+      margin-bottom: 22px; display: flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    .gen-eyebrow { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.4); letter-spacing: 2.5px; text-transform: uppercase; }
+    .gen-code-display {
+      min-width: 240px; min-height: 68px; border-radius: 14px;
+      background: rgba(255,255,255,.1); padding: 14px 24px;
+      font-size: 30px; font-weight: 700; color: white; letter-spacing: 5px;
+      text-align: center; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background .2s; user-select: all;
+    }
+    .gen-code-display:hover { background: rgba(255,255,255,.16); }
+    .gen-code-display.placeholder { font-size: 14px; font-weight: 400; color: rgba(255,255,255,.3); letter-spacing: 0; }
+    .gen-copy-hint { font-size: 11px; color: rgba(255,255,255,.28); }
+    .gen-btn {
+      width: 100%; padding: 14px; background: var(--gold); color: white;
+      border: none; border-radius: 100px; font-family: inherit; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: opacity .2s; letter-spacing: .5px;
+    }
+    .gen-btn:hover { opacity: .88; }
+    .gen-footer { font-size: 12px; color: rgba(255,255,255,.35); text-align: center; line-height: 1.6; }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%) translateY(16px);
+      background: rgba(27,67,50,.92); color: white; padding: 10px 24px;
+      border-radius: 100px; font-size: 13px; font-weight: 500;
+      pointer-events: none; opacity: 0; transition: all .28s; white-space: nowrap; z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Code list */
+    .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .list-title { font-size: 14px; font-weight: 600; }
+    .clear-btn {
+      font-size: 12px; color: #c0392b; background: none;
+      border: 1px solid rgba(192,57,43,.25); border-radius: 100px;
+      padding: 5px 13px; font-family: inherit; cursor: pointer;
+    }
+    .code-list { display: flex; flex-direction: column; gap: 8px; }
+    .code-item {
+      background: white; border-radius: 13px; padding: 13px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 4px rgba(27,67,50,.06); transition: opacity .2s;
+    }
+    .code-item.is-used { opacity: .45; }
+    .code-item.is-new { animation: slideIn .3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .ci-code { font-size: 16px; font-weight: 600; letter-spacing: 2px; color: var(--g1); }
+    .ci-meta { font-size: 11px; color: rgba(27,67,50,.4); margin-top: 3px; }
+    .ci-badge { font-size: 11px; font-weight: 600; padding: 4px 11px; border-radius: 100px; flex-shrink: 0; }
+    .badge-ok { background: rgba(82,183,136,.15); color: var(--g2); }
+    .badge-used { background: rgba(201,150,58,.15); color: var(--gold); }
+    .empty-state { text-align: center; padding: 48px 20px; color: rgba(27,67,50,.3); font-size: 14px; line-height: 1.8; }
+  </style>
+</head>
+<body>
+
+<!-- ── PASSWORD SCREEN ── -->
+<div id="pass-screen">
+  <div class="pass-logo">☕</div>
+  <div class="pass-title">Trang quản lý</div>
+  <div class="pass-sub">Photobooth · Quán của Thời Thanh Xuân</div>
+  <input class="pass-input" id="pass-input" type="password" placeholder="Mật khẩu"
+    onkeydown="if(event.key==='Enter')checkPass()">
+  <div class="pass-err" id="pass-err"></div>
+  <button class="pass-btn" onclick="checkPass()">Đăng nhập</button>
+</div>
+
+<!-- ── MAIN DASHBOARD ── -->
+<div class="main" id="main-app" style="display:none">
+
+  <div class="header">
+    <div class="header-title">Quản lý mã chụp ảnh</div>
+    <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">Đã tạo</div>
+    </div>
+    <div class="stat-card s-used">
+      <div class="stat-num" id="stat-used">0</div>
+      <div class="stat-label">Đã dùng</div>
+    </div>
+    <div class="stat-card s-rem">
+      <div class="stat-num" id="stat-remain">0</div>
+      <div class="stat-label">Còn lại</div>
+    </div>
+  </div>
+
+  <div class="gen-box">
+    <div class="gen-eyebrow">Mã chụp ảnh</div>
+    <div class="gen-code-display placeholder" id="gen-display" onclick="copyCode()">Nhấn tạo mã bên dưới</div>
+    <div class="gen-copy-hint" id="copy-hint" style="display:none">Nhấn vào mã để sao chép</div>
+    <button class="gen-btn" onclick="createCode()">✦ &nbsp;Tạo mã mới</button>
+    <div class="gen-footer">Đọc mã này cho khách nhập vào màn hình photobooth</div>
+  </div>
+
+  <div class="list-header">
+    <div class="list-title">Tất cả mã</div>
+    <button class="clear-btn" onclick="clearUsed()">Xoá mã đã dùng</button>
+  </div>
+  <div class="code-list" id="code-list"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const ADMIN_PASS = 'QCTTX2025';
+  const STORE_KEY  = 'ncttx_codes';
+  const CHARS      = 'ABCDEFGHJKLMNPQRSTVWXYZ23456789'; // loại I,O,U,0,1 tránh nhầm
+
+  let lastCode = null;
+
+  // ── AUTH ──────────────────────────────────────
+  function checkPass() {
+    const val = document.getElementById('pass-input').value;
+    if (val === ADMIN_PASS) {
+      document.getElementById('pass-screen').classList.add('hidden');
+      document.getElementById('main-app').style.display = 'block';
+      render();
+    } else {
+      document.getElementById('pass-err').textContent = 'Mật khẩu không đúng.';
+    }
+  }
+
+  function logout() {
+    document.getElementById('pass-screen').classList.remove('hidden');
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('pass-input').value = '';
+    document.getElementById('pass-err').textContent = '';
+    lastCode = null;
+    resetDisplay();
+  }
+
+  // ── DATA ──────────────────────────────────────
+  function getData() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
+    catch(e) { return {}; }
+  }
+
+  function saveData(data) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+    catch(e) { toast('Lỗi lưu dữ liệu.'); }
+  }
+
+  // ── GENERATE ──────────────────────────────────
+  function randomSuffix() {
+    return Array.from({length: 3}, () => CHARS[Math.floor(Math.random() * CHARS.length)]).join('');
+  }
+
+  function createCode() {
+    const data = getData();
+    let code, tries = 0;
+    do {
+      code = 'NCTTX' + randomSuffix();
+      tries++;
+    } while (data[code] && tries < 1000);
+
+    data[code] = { created: Date.now(), used: false };
+    saveData(data);
+    lastCode = code;
+
+    const el = document.getElementById('gen-display');
+    el.textContent = code;
+    el.classList.remove('placeholder');
+    document.getElementById('copy-hint').style.display = 'block';
+
+    render(code);
+  }
+
+  function copyCode() {
+    if (!lastCode) return;
+    navigator.clipboard.writeText(lastCode).then(() => toast('Đã sao chép: ' + lastCode)).catch(() => toast(lastCode));
+  }
+
+  // ── RENDER ────────────────────────────────────
+  function render(newCode) {
+    const data = getData();
+    const entries = Object.entries(data).sort((a, b) => b[1].created - a[1].created);
+    const usedCount = entries.filter(([,v]) => v.used).length;
+
+    document.getElementById('stat-total').textContent  = entries.length;
+    document.getElementById('stat-used').textContent   = usedCount;
+    document.getElementById('stat-remain').textContent = entries.length - usedCount;
+
+    const list = document.getElementById('code-list');
+    if (!entries.length) {
+      list.innerHTML = '<div class="empty-state">Chưa có mã nào được tạo.<br>Nhấn "Tạo mã mới" để bắt đầu.</div>';
+      return;
+    }
+
+    list.innerHTML = entries.map(([code, v]) => {
+      const created = fmt(v.created);
+      const usedAt  = v.usedAt ? fmt(v.usedAt) : '';
+      const isNew   = code === newCode;
+      return `<div class="code-item${v.used ? ' is-used' : ''}${isNew ? ' is-new' : ''}">
+        <div>
+          <div class="ci-code">${code}</div>
+          <div class="ci-meta">${v.used ? `Đã dùng lúc ${usedAt}` : `Tạo lúc ${created}`}</div>
+        </div>
+        <span class="ci-badge ${v.used ? 'badge-used' : 'badge-ok'}">${v.used ? 'Đã dùng' : 'Còn dùng'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function fmt(ts) {
+    return new Date(ts).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  }
+
+  function resetDisplay() {
+    const el = document.getElementById('gen-display');
+    el.textContent = 'Nhấn tạo mã bên dưới';
+    el.classList.add('placeholder');
+    document.getElementById('copy-hint').style.display = 'none';
+  }
+
+  function clearUsed() {
+    const data = getData();
+    const count = Object.values(data).filter(v => v.used).length;
+    if (!count) { toast('Không có mã đã dùng để xoá.'); return; }
+    if (!confirm(`Xoá ${count} mã đã dùng?`)) return;
+    Object.keys(data).forEach(k => { if (data[k].used) delete data[k]; });
+    saveData(data);
+    toast(`Đã xoá ${count} mã đã dùng.`);
+    render();
+  }
+
+  // ── TOAST ─────────────────────────────────────
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // Tự cập nhật khi photobooth đánh dấu mã đã dùng (cùng tab / storage event)
+  window.addEventListener('storage', e => {
+    if (e.key === STORE_KEY && document.getElementById('main-app').style.display !== 'none') render();
+  });
+</script>
+</body>
+</html>

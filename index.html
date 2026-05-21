@@ -218,6 +218,8 @@
     .pg-err{font-size:12px;color:#ff7070;text-align:center;min-height:16px;margin-bottom:6px}
     .pg-btn{width:100%;padding:14px;background:var(--g1);color:white;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .2s;-webkit-tap-highlight-color:transparent}
     .pg-btn:hover{opacity:.88}
+    .pg-note{margin-top:14px;padding:12px 14px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.2);border-radius:10px;font-size:12px;color:rgba(255,255,255,.55);text-align:center;line-height:1.6}
+    .pg-note strong{color:var(--gold);font-weight:600}
     .pg-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
     .pg-qr{width:190px;height:190px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden}
     .pg-qr img{width:100%;height:100%;object-fit:contain}
@@ -425,7 +427,10 @@ const S = {
   photos: [], allPhotos: [], selected: [],
   stream: null, busy: false, finalURL: null, unlocked: false
 };
-const FREE_CODE = 'NCTTX2025';
+const STORE_KEY = 'ncttx_codes';
+function getCodeData() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e) { return {}; }
+}
 
 // ── FILTERS ───────────────────────────────────
 const VIDEO_FILTERS = {
@@ -958,13 +963,21 @@ function switchPayTab(tab, btn) {
 
 function verifyCode() {
   const val = document.getElementById('pg-code-input').value.trim().toUpperCase();
-  if (val === FREE_CODE) {
-    S.unlocked = true;
-    closePayGate();
-    composeAndShow();
-  } else {
+  const data = getCodeData();
+  if (!data[val]) {
     document.getElementById('pg-code-err').textContent = 'Mã không đúng. Vui lòng thử lại.';
+    return;
   }
+  if (data[val].used) {
+    document.getElementById('pg-code-err').textContent = 'Mã này đã được sử dụng rồi.';
+    return;
+  }
+  data[val].used = true;
+  data[val].usedAt = Date.now();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) {}
+  S.unlocked = true;
+  closePayGate();
+  composeAndShow();
 }
 
 function confirmPaid() {
@@ -995,6 +1008,7 @@ document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
           onkeydown="if(event.key==='Enter')verifyCode()">
         <div class="pg-err" id="pg-code-err"></div>
         <button class="pg-btn" onclick="verifyCode()">Xác nhận</button>
+        <div class="pg-note">Hãy liên hệ <strong>"KHU VỰC TÍNH TIỀN"</strong> của Nhà để có được mã chụp ảnh. Xin cảm ơn</div>
       </div>
     </div>
   </div>

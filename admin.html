@@ -111,6 +111,19 @@
     .ci-badge { font-size: 11px; font-weight: 600; padding: 4px 11px; border-radius: 100px; flex-shrink: 0; }
     .badge-ok { background: rgba(82,183,136,.15); color: var(--g2); }
     .badge-used { background: rgba(201,150,58,.15); color: var(--gold); }
+    .ci-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .ci-print-btn {
+      font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 100px;
+      background: none; border: 1px solid rgba(27,67,50,.2); color: rgba(27,67,50,.55);
+      font-family: inherit; cursor: pointer; transition: all .18s;
+    }
+    .ci-print-btn:hover { background: var(--g1); border-color: var(--g1); color: white; }
+    .gen-print-btn {
+      width: 100%; padding: 12px; background: rgba(255,255,255,.12); color: white;
+      border: 1px solid rgba(255,255,255,.2); border-radius: 100px;
+      font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: background .18s;
+    }
+    .gen-print-btn:hover { background: rgba(255,255,255,.2); }
     .empty-state { text-align: center; padding: 48px 20px; color: rgba(27,67,50,.3); font-size: 14px; line-height: 1.8; }
   </style>
 </head>
@@ -154,8 +167,9 @@
     <div class="gen-eyebrow">Mã chụp ảnh</div>
     <div class="gen-code-display placeholder" id="gen-display" onclick="copyCode()">Nhấn tạo mã bên dưới</div>
     <div class="gen-copy-hint" id="copy-hint" style="display:none">Nhấn vào mã để sao chép</div>
+    <button class="gen-print-btn" id="gen-print-btn" style="display:none" onclick="printCode(lastCode)">🖨&nbsp; In mã này</button>
     <button class="gen-btn" onclick="createCode()">✦ &nbsp;Tạo mã mới</button>
-    <div class="gen-footer">Đọc mã này cho khách nhập vào màn hình photobooth</div>
+    <div class="gen-footer">Đọc hoặc in mã này cho khách nhập vào màn hình photobooth</div>
   </div>
 
   <div class="list-header">
@@ -168,11 +182,12 @@
 <div id="toast"></div>
 
 <script>
+  const DB_URL     = 'https://ncttx-photobooth-default-rtdb.asia-southeast1.firebasedatabase.app';
   const ADMIN_PASS = 'QCTTX2025';
-  const STORE_KEY  = 'ncttx_codes';
   const CHARS      = 'ABCDEFGHJKLMNPQRSTVWXYZ23456789'; // loại I,O,U,0,1 tránh nhầm
 
   let lastCode = null;
+  let sseSource = null;
 
   // ── AUTH ──────────────────────────────────────
   function checkPass() {
@@ -181,6 +196,7 @@
       document.getElementById('pass-screen').classList.add('hidden');
       document.getElementById('main-app').style.display = 'block';
       render();
+      startListener();
     } else {
       document.getElementById('pass-err').textContent = 'Mật khẩu không đúng.';
     }
@@ -193,17 +209,15 @@
     document.getElementById('pass-err').textContent = '';
     lastCode = null;
     resetDisplay();
+    if (sseSource) { sseSource.close(); sseSource = null; }
   }
 
   // ── DATA ──────────────────────────────────────
-  function getData() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
-    catch(e) { return {}; }
-  }
-
-  function saveData(data) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
-    catch(e) { toast('Lỗi lưu dữ liệu.'); }
+  async function getData() {
+    try {
+      const res = await fetch(`${DB_URL}/codes.json`);
+      return (await res.json()) || {};
+    } catch(e) { return {}; }
   }
 
   // ── GENERATE ──────────────────────────────────
@@ -211,23 +225,26 @@
     return Array.from({length: 3}, () => CHARS[Math.floor(Math.random() * CHARS.length)]).join('');
   }
 
-  function createCode() {
-    const data = getData();
+  async function createCode() {
+    const data = await getData();
     let code, tries = 0;
     do {
       code = 'NCTTX' + randomSuffix();
       tries++;
     } while (data[code] && tries < 1000);
 
-    data[code] = { created: Date.now(), used: false };
-    saveData(data);
-    lastCode = code;
+    await fetch(`${DB_URL}/codes/${code}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ created: Date.now(), used: false })
+    });
 
+    lastCode = code;
     const el = document.getElementById('gen-display');
     el.textContent = code;
     el.classList.remove('placeholder');
     document.getElementById('copy-hint').style.display = 'block';
-
+    document.getElementById('gen-print-btn').style.display = 'block';
     render(code);
   }
 
@@ -237,8 +254,8 @@
   }
 
   // ── RENDER ────────────────────────────────────
-  function render(newCode) {
-    const data = getData();
+  async function render(newCode) {
+    const data = await getData();
     const entries = Object.entries(data).sort((a, b) => b[1].created - a[1].created);
     const usedCount = entries.filter(([,v]) => v.used).length;
 
@@ -261,7 +278,10 @@
           <div class="ci-code">${code}</div>
           <div class="ci-meta">${v.used ? `Đã dùng lúc ${usedAt}` : `Tạo lúc ${created}`}</div>
         </div>
-        <span class="ci-badge ${v.used ? 'badge-used' : 'badge-ok'}">${v.used ? 'Đã dùng' : 'Còn dùng'}</span>
+        <div class="ci-right">
+          <button class="ci-print-btn" onclick="printCode('${code}')">🖨 In</button>
+          <span class="ci-badge ${v.used ? 'badge-used' : 'badge-ok'}">${v.used ? 'Đã dùng' : 'Còn dùng'}</span>
+        </div>
       </div>`;
     }).join('');
   }
@@ -275,17 +295,64 @@
     el.textContent = 'Nhấn tạo mã bên dưới';
     el.classList.add('placeholder');
     document.getElementById('copy-hint').style.display = 'none';
+    document.getElementById('gen-print-btn').style.display = 'none';
   }
 
-  function clearUsed() {
-    const data = getData();
-    const count = Object.values(data).filter(v => v.used).length;
-    if (!count) { toast('Không có mã đã dùng để xoá.'); return; }
-    if (!confirm(`Xoá ${count} mã đã dùng?`)) return;
-    Object.keys(data).forEach(k => { if (data[k].used) delete data[k]; });
-    saveData(data);
-    toast(`Đã xoá ${count} mã đã dùng.`);
+  function printCode(code) {
+    const date = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const w = window.open('', '_blank', 'width=500,height=220');
+    w.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+  @page { size: 3.5in 1.5in landscape; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 3.5in; height: 1.5in;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    background: white;
+  }
+  .brand { font-size: 7.5pt; font-weight: 600; color: #1B4332; letter-spacing: 2px; text-transform: uppercase; }
+  .line  { width: 75%; height: 0.5px; background: #1B4332; opacity: .2; }
+  .code  { font-size: 26pt; font-weight: 700; color: #1B4332; letter-spacing: 5px; }
+  .sub   { font-size: 7pt; font-weight: 500; color: #C9963A; letter-spacing: 3px; text-transform: uppercase; }
+  .date  { font-size: 6.5pt; color: rgba(27,67,50,.4); margin-top: 1px; }
+</style>
+</head>
+<body>
+  <div class="brand">Quán của Thời Thanh Xuân</div>
+  <div class="line"></div>
+  <div class="code">${code}</div>
+  <div class="line"></div>
+  <div class="sub">· Mã chụp ảnh ·</div>
+  <div class="date">${date}</div>
+</body></html>`);
+    w.document.close();
+    w.addEventListener('load', () => { w.focus(); w.print(); });
+  }
+
+  async function clearUsed() {
+    const data = await getData();
+    const usedKeys = Object.keys(data).filter(k => data[k].used);
+    if (!usedKeys.length) { toast('Không có mã đã dùng để xoá.'); return; }
+    if (!confirm(`Xoá ${usedKeys.length} mã đã dùng?`)) return;
+    await Promise.all(usedKeys.map(k =>
+      fetch(`${DB_URL}/codes/${k}.json`, { method: 'DELETE' })
+    ));
+    toast(`Đã xoá ${usedKeys.length} mã đã dùng.`);
     render();
+  }
+
+  // ── REAL-TIME (Firebase SSE) ───────────────────
+  function startListener() {
+    if (sseSource) sseSource.close();
+    sseSource = new EventSource(`${DB_URL}/codes.json`);
+    sseSource.addEventListener('put',   () => render());
+    sseSource.addEventListener('patch', () => render());
   }
 
   // ── TOAST ─────────────────────────────────────
@@ -295,11 +362,6 @@
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2500);
   }
-
-  // Tự cập nhật khi photobooth đánh dấu mã đã dùng (cùng tab / storage event)
-  window.addEventListener('storage', e => {
-    if (e.key === STORE_KEY && document.getElementById('main-app').style.display !== 'none') render();
-  });
 </script>
 </body>
 </html>

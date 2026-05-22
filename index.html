@@ -427,10 +427,7 @@ const S = {
   photos: [], allPhotos: [], selected: [],
   stream: null, busy: false, finalURL: null, unlocked: false
 };
-const STORE_KEY = 'ncttx_codes';
-function getCodeData() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e) { return {}; }
-}
+const DB_URL = 'https://ncttx-photobooth-default-rtdb.asia-southeast1.firebasedatabase.app';
 
 // ── FILTERS ───────────────────────────────────
 const VIDEO_FILTERS = {
@@ -961,23 +958,30 @@ function switchPayTab(tab, btn) {
   document.getElementById('pg-code-err').textContent = '';
 }
 
-function verifyCode() {
-  const val = document.getElementById('pg-code-input').value.trim().toUpperCase();
-  const data = getCodeData();
-  if (!data[val]) {
-    document.getElementById('pg-code-err').textContent = 'Mã không đúng. Vui lòng thử lại.';
-    return;
+async function verifyCode() {
+  const val   = document.getElementById('pg-code-input').value.trim().toUpperCase();
+  const errEl = document.getElementById('pg-code-err');
+  const btn   = document.querySelector('.pg-btn');
+  errEl.textContent = '';
+  btn.disabled = true; btn.textContent = 'Đang kiểm tra...';
+  try {
+    const res   = await fetch(`${DB_URL}/codes/${val}.json`);
+    const entry = await res.json();
+    if (!entry)       { errEl.textContent = 'Mã không đúng. Vui lòng thử lại.'; return; }
+    if (entry.used)   { errEl.textContent = 'Mã này đã được sử dụng rồi.'; return; }
+    await fetch(`${DB_URL}/codes/${val}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ used: true, usedAt: Date.now() })
+    });
+    S.unlocked = true;
+    closePayGate();
+    composeAndShow();
+  } catch(e) {
+    errEl.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Xác nhận';
   }
-  if (data[val].used) {
-    document.getElementById('pg-code-err').textContent = 'Mã này đã được sử dụng rồi.';
-    return;
-  }
-  data[val].used = true;
-  data[val].usedAt = Date.now();
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) {}
-  S.unlocked = true;
-  closePayGate();
-  composeAndShow();
 }
 
 function confirmPaid() {

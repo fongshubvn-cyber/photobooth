@@ -320,6 +320,7 @@
     <div class="cam-top">
       <button class="cam-pill" onclick="backToPick()">← Đổi khung</button>
       <div class="cam-pill cam-counter" id="cam-counter">Ảnh 1 / 4</div>
+      <button class="cam-pill" onclick="rotateCamFromCamera(this)" style="font-size:16px;padding:6px 12px">↺</button>
       <div class="cam-pill cam-filter-badge" id="filter-badge"></div>
     </div>
     <div class="cam-bottom">
@@ -477,19 +478,39 @@ async function startStream(videoEl) {
   }
 }
 
+function applyRotationCSS(videoEl) {
+  const camW = parseInt(localStorage.getItem('pb_cam_w') || '1920');
+  const camH = parseInt(localStorage.getItem('pb_cam_h') || '1440');
+  if (camH > camW) videoEl.classList.add('cam-portrait');
+  else videoEl.classList.remove('cam-portrait');
+}
+
 async function rotateCam(btn) {
   const camW = parseInt(localStorage.getItem('pb_cam_w') || '1920');
   const camH = parseInt(localStorage.getItem('pb_cam_h') || '1440');
-  // Swap width ↔ height để đổi hướng
   localStorage.setItem('pb_cam_w', camH);
   localStorage.setItem('pb_cam_h', camW);
-  S.lastCamW = null; // force restart stream
+  S.lastCamW = null;
   btn.style.opacity = '0.5';
   btn.disabled = true;
   const pickVideo = document.getElementById('pick-video');
+  applyRotationCSS(pickVideo);
   await startStream(pickVideo);
   btn.style.opacity = '';
   btn.disabled = false;
+}
+
+async function rotateCamFromCamera(btn) {
+  const camW = parseInt(localStorage.getItem('pb_cam_w') || '1920');
+  const camH = parseInt(localStorage.getItem('pb_cam_h') || '1440');
+  localStorage.setItem('pb_cam_w', camH);
+  localStorage.setItem('pb_cam_h', camW);
+  S.lastCamW = null;
+  if (btn) { btn.style.opacity = '0.5'; btn.disabled = true; }
+  const videoEl = document.getElementById('video');
+  applyRotationCSS(videoEl);
+  await startStream(videoEl);
+  if (btn) { btn.style.opacity = ''; btn.disabled = false; }
 }
 
 function stopCam() {
@@ -652,6 +673,7 @@ function backToHome() { stopCam(); show('home'); }
 async function goToCamera() {
   show('camera');
   S.photos = []; S.allPhotos = []; S.selected = []; S.busy = false;
+  applyRotationCSS(document.getElementById('video'));
   buildThumbs(); updateCounter();
   const badge = document.getElementById('filter-badge');
   badge.textContent = FILTER_LABELS[S.filter];

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Frame Generator</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+  h2 { margin-bottom: 4px; }
+  .grid { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+  .card { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); text-align: center; }
+  canvas { display: block; width: 180px; height: auto; border: 1px solid #ddd; margin: 8px auto; }
+  .name { font-weight: bold; font-size: 14px; margin-bottom: 6px; }
+  button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .btn-dl { background: #1B4332; color: white; margin-top: 6px; }
+  .btn-all { background: #C9A84C; color: white; font-size: 16px; padding: 12px 28px; margin: 10px 0; }
+  .note { color: #666; font-size: 13px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<h2>Test Frame Generator — Nhà của Thời Thanh Xuân</h2>
+<p class="note">Mỗi frame có 6 ô trong suốt (16:9). Dùng được cho cả layout 4 và 6 ảnh.</p>
+<button class="btn-all" onclick="exportAll()">⬇ Tải tất cả 4 frame</button>
+<div class="grid" id="grid"></div>
+
+<script>
+const FRAMES = [
+  { id: 'nhat-ky',   label: 'Nhật Ký Thời Xuân', bg: '#F5EDD6', border: '#5C3D2E', text: '#5C3D2E', sub: '#7A9E7E' },
+  { id: 'suong-mai', label: 'Sương Mai Đà Lạt',   bg: '#F0EDF5', border: '#B8A9C9', text: '#3B2314', sub: '#7A9E7E' },
+  { id: 'goc-go',    label: 'Gốc Gỗ Cũ',          bg: '#F5EDD6', border: '#3B2314', text: '#3B2314', sub: '#C9A84C' },
+  { id: 'bao-xuan',  label: 'Báo Xuân',            bg: '#FDFAF4', border: '#1B4332', text: '#1B4332', sub: '#C0392B' },
+];
+
+// Canvas = 1200×1800px → tỷ lệ 2:3 = in vừa khít giấy 10×15cm
+const W = 1200, H = 1800;
+const ROWS = 3, COLS = 2;
+const PAD_SIDE = 48, GAP = 16;
+
+const SW = Math.floor((W - PAD_SIDE * 2 - GAP * (COLS - 1)) / COLS); // 544px
+const SH = Math.round(SW * 9 / 16);                                   // 306px
+
+const slotsH  = ROWS * SH + (ROWS - 1) * GAP;  // 950px
+const PAD_TOP = 380;                             // header area
+const PAD_BOT = H - slotsH - PAD_TOP;           // 470px footer area
+
+function makeFrame(f) {
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+
+  // Nền
+  ctx.fillStyle = f.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Viền ngoài
+  ctx.strokeStyle = f.border;
+  ctx.lineWidth = 10;
+  ctx.strokeRect(16, 16, W - 32, H - 32);
+
+  // Viền trong mỏng
+  ctx.strokeStyle = f.sub;
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.4;
+  ctx.strokeRect(30, 30, W - 60, H - 60);
+  ctx.globalAlpha = 1;
+
+  // ── HEADER ──
+  ctx.textAlign = 'center';
+
+  // Ornament nhỏ đầu trang
+  ctx.fillStyle = f.sub;
+  ctx.globalAlpha = 0.5;
+  ctx.font = '28px Georgia, serif';
+  ctx.fillText('✦', W / 2, 78);
+  ctx.globalAlpha = 1;
+
+  // Brand name
+  ctx.fillStyle = f.text;
+  ctx.font = 'bold 64px Georgia, serif';
+  ctx.fillText('Nhà của Thời Thanh Xuân', W / 2, 152);
+
+  // Frame label
+  ctx.fillStyle = f.sub;
+  ctx.font = '30px Georgia, serif';
+  ctx.fillText(`${f.label}  ·  Đà Lạt`, W / 2, 206);
+
+  // Divider lines với ornament
+  const lineY = 260;
+  ctx.strokeStyle = f.border; ctx.lineWidth = 1; ctx.globalAlpha = 0.25;
+  ctx.beginPath(); ctx.moveTo(60, lineY); ctx.lineTo(W / 2 - 24, lineY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W / 2 + 24, lineY); ctx.lineTo(W - 60, lineY); ctx.stroke();
+  ctx.globalAlpha = 0.45;
+  ctx.fillStyle = f.sub;
+  ctx.font = '18px Georgia, serif';
+  ctx.fillText('✦', W / 2, lineY + 7);
+  ctx.globalAlpha = 1;
+
+  // Ngày / sub-label
+  ctx.fillStyle = f.text;
+  ctx.globalAlpha = 0.4;
+  ctx.font = '22px Georgia, serif';
+  ctx.fillText('P H O T O   B O O T H', W / 2, 310);
+  ctx.globalAlpha = 1;
+
+  // Separator line ngay trên slot
+  ctx.strokeStyle = f.border; ctx.lineWidth = 1; ctx.globalAlpha = 0.12;
+  ctx.beginPath(); ctx.moveTo(PAD_SIDE, PAD_TOP - 18); ctx.lineTo(W - PAD_SIDE, PAD_TOP - 18); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // ── SLOTS (đục lỗ trong suốt) ──
+  for (let r = 0; r < ROWS; r++) {
+    for (let col = 0; col < COLS; col++) {
+      const x = PAD_SIDE + col * (SW + GAP);
+      const y = PAD_TOP  + r   * (SH + GAP);
+      ctx.clearRect(x, y, SW, SH);
+    }
+  }
+
+  // ── FOOTER ──
+  const botY = PAD_TOP + slotsH;
+
+  // Separator line ngay dưới slot
+  ctx.strokeStyle = f.border; ctx.lineWidth = 1; ctx.globalAlpha = 0.12;
+  ctx.beginPath(); ctx.moveTo(PAD_SIDE, botY + 18); ctx.lineTo(W - PAD_SIDE, botY + 18); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Quote chính
+  ctx.fillStyle = f.text;
+  ctx.font = 'italic 34px Georgia, serif';
+  ctx.fillText('Thanh xuân là để nhớ mãi', W / 2, botY + 82);
+
+  // Brand phụ
+  ctx.fillStyle = f.sub;
+  ctx.font = '22px Georgia, serif';
+  ctx.fillText('N C T T X  ·  Đà Lạt', W / 2, botY + 130);
+
+  // Divider footer
+  const fLineY = botY + 168;
+  ctx.strokeStyle = f.border; ctx.lineWidth = 1; ctx.globalAlpha = 0.2;
+  ctx.beginPath(); ctx.moveTo(120, fLineY); ctx.lineTo(W / 2 - 20, fLineY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W / 2 + 20, fLineY); ctx.lineTo(W - 120, fLineY); ctx.stroke();
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = f.sub;
+  ctx.font = '16px Georgia, serif';
+  ctx.fillText('✦', W / 2, fLineY + 6);
+  ctx.globalAlpha = 1;
+
+  // Tagline cuối
+  ctx.fillStyle = f.text;
+  ctx.globalAlpha = 0.3;
+  ctx.font = '20px Georgia, serif';
+  ctx.fillText('nhacuathoithanhxuan.com', W / 2, botY + 230);
+  ctx.globalAlpha = 1;
+
+  return c;
+}
+
+function downloadCanvas(c, filename) {
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = c.toDataURL('image/png');
+  a.click();
+}
+
+// Render preview cards
+const grid = document.getElementById('grid');
+FRAMES.forEach(f => {
+  const c = makeFrame(f);
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<div class="name">${f.label}</div><p class="note">${W}×${H}px · ${SW}×${SH} mỗi ô</p>`;
+  card.appendChild(c);
+  const btn = document.createElement('button');
+  btn.className = 'btn-dl';
+  btn.textContent = `⬇ ${f.id}.png`;
+  btn.onclick = () => downloadCanvas(c, `${f.id}.png`);
+  card.appendChild(btn);
+  grid.appendChild(card);
+});
+
+function exportAll() {
+  FRAMES.forEach((f, i) => {
+    setTimeout(() => {
+      const c = makeFrame(f);
+      downloadCanvas(c, `${f.id}.png`);
+    }, i * 400);
+  });
+}
+</script>
+</body>
+</html>

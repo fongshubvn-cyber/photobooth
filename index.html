@@ -743,10 +743,10 @@ function captureFrame() {
     const tc = tmp.getContext('2d');
     tc.translate(W, 0); tc.scale(-1, 1);
     tc.drawImage(video, 0, 0, W, H);
-    // Rotate 90° CW: canvas portrait = H×W
+    // Rotate 90° CCW (khớp với CSS rotate(-90deg) trên preview)
     canvas.width = H; canvas.height = W;
-    ctx.translate(H, 0);
-    ctx.rotate(Math.PI / 2);
+    ctx.translate(0, W);
+    ctx.rotate(-Math.PI / 2);
     ctx.drawImage(tmp, 0, 0, W, H);
   } else {
     // Landscape: crop theo screen AR như cũ
@@ -862,7 +862,7 @@ function calcFixedSlots(W, H, count, ar = 16 / 9) {
 }
 
 async function compose() {
-  await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1500))]);
+  await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 200))]);
   const { img, slots } = await getFrame(S.frame);
   const photos = await Promise.all(S.photos.map(loadImg));
   const canvas = mk(img.width, img.height);
@@ -917,7 +917,7 @@ async function compose() {
     }
   }
 
-  return canvas.toDataURL('image/jpeg', .93);
+  return canvas.toDataURL('image/jpeg', .88);
 }
 
 // ── Photo draw with canvas filter ─────────────

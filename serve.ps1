@@ -1,4 +1,4 @@
-$root = "d:\Project\project-manager\photobooth"
+$root = $PSScriptRoot
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:8080/")
 $listener.Start()

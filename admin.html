@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Quản lý Photobooth · NCTTX</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --g1: #1B4332; --g2: #2D6A4F; --g3: #52B788;
       --gold: #C9963A; --bg: #EDEAE3; --cream: #F5F0E8;
     }
-    html, body { min-height: 100%; background: var(--bg); font-family: 'Be Vietnam Pro', sans-serif; color: var(--g1); }
+    html, body { min-height: 100%; background: var(--bg); font-family: 'Montserrat', sans-serif; color: var(--g1); }
 
     /* ── PASSWORD ── */
     #pass-screen {
@@ -304,6 +304,7 @@
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('codes',this)">Mã chụp ảnh</button>
     <button class="tab-btn" onclick="switchTab('frames',this)">Frame</button>
+    <button class="tab-btn" onclick="switchTab('settings',this)">Cài đặt</button>
   </div>
 
   <!-- ── TAB: MÃ CODE ── -->
@@ -429,6 +430,84 @@
     </div>
   </div>
 
+  <!-- ── TAB: CÀI ĐẶT ── -->
+  <div id="tab-settings" class="tab-panel">
+    <div class="settings-inner" style="max-width: 540px; margin: 0 auto; padding: 24px 18px 80px;">
+      <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 16px rgba(27,67,50,.06);">
+        <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; border-bottom: 1.5px solid rgba(27,67,50,.08); padding-bottom: 10px; color: var(--g1);">Cấu hình QR Code & Đám mây</h2>
+        
+        <!-- Bật tắt QR -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+          <div style="padding-right: 12px;">
+            <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 2px; color: var(--g1);">Bật QR Code trên ảnh</label>
+            <span style="font-size: 12px; color: rgba(27,67,50,.5); display: block; line-height: 1.4;">Tự động sinh mã QR và vẽ lên góc ảnh để khách quét tải trực tiếp</span>
+          </div>
+          <input type="checkbox" id="cfg-qr-enabled" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--g1);" onchange="saveSettings()">
+        </div>
+
+        <!-- Vị trí QR -->
+        <div style="margin-bottom: 20px;">
+          <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; color: var(--g1);">Vị trí hiển thị QR</label>
+          <select id="cfg-qr-position" style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid rgba(27,67,50,.18); font-family: inherit; font-size: 14px; outline: none; background: white; color: var(--g1);" onchange="saveSettings()">
+            <option value="bottom-right">Góc dưới - Phải</option>
+            <option value="bottom-left">Góc dưới - Trái</option>
+            <option value="top-right">Góc trên - Phải</option>
+            <option value="top-left">Góc trên - Trái</option>
+          </select>
+        </div>
+
+        <!-- Nhà cung cấp Cloud -->
+        <div style="margin-bottom: 20px;">
+          <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; color: var(--g1);">Dịch vụ lưu trữ ảnh (Cloud Storage)</label>
+          <select id="cfg-cloud-provider" style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid rgba(27,67,50,.18); font-family: inherit; font-size: 14px; outline: none; background: white; color: var(--g1);" onchange="toggleCloudFields(); saveSettings();">
+            <option value="none">Không sử dụng (Chỉ tải file xuống máy)</option>
+            <option value="cloudinary">Cloudinary (Khuyên dùng - Nhanh & Miễn phí)</option>
+            <option value="firebase">Firebase Storage (Trong cùng Firebase project)</option>
+          </select>
+        </div>
+
+        <!-- Đường dẫn trang trung gian -->
+        <div style="margin-bottom: 20px;">
+          <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 2px; color: var(--g1);">Đường dẫn trang trung gian (URL)</label>
+          <span style="font-size: 11px; color: rgba(27,67,50,.5); display: block; margin-bottom: 6px; line-height: 1.4;">Nhập link trang download.html online của bạn (ví dụ: https://mywebsite.com/download.html). Để trống nếu muốn quét ra trực tiếp file ảnh.</span>
+          <input type="text" id="cfg-redirect-url" placeholder="https://example.com/download.html" style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid rgba(27,67,50,.18); font-family: inherit; font-size: 13px; outline: none; color: var(--g1);" oninput="saveSettings()">
+        </div>
+
+        <!-- Cấu hình Cloudinary -->
+        <div id="section-cloudinary" style="display: none; background: rgba(27,67,50,.03); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+          <h3 style="font-size: 12px; font-weight: 600; color: var(--g1); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px;">Cấu hình Cloudinary</h3>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 12px; color: rgba(27,67,50,.7); display: block; margin-bottom: 4px;">Cloud Name</label>
+            <input type="text" id="cfg-cloudinary-name" placeholder="Ví dụ: dxyz12345" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(27,67,50,.18); font-family: inherit; font-size: 13px; outline: none; color: var(--g1);" oninput="saveSettings()">
+          </div>
+          <div>
+            <label style="font-size: 12px; color: rgba(27,67,50,.7); display: block; margin-bottom: 4px;">Upload Preset (Unsigned)</label>
+            <input type="text" id="cfg-cloudinary-preset" placeholder="Ví dụ: photobooth_preset" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(27,67,50,.18); font-family: inherit; font-size: 13px; outline: none; color: var(--g1);" oninput="saveSettings()">
+          </div>
+          <span style="font-size: 11px; color: rgba(27,67,50,.5); display: block; margin-top: 8px; line-height: 1.4;">
+            * Lưu ý: Cần tạo một <strong>Unsigned Upload Preset</strong> trong phần cài đặt Upload của Cloudinary để cho phép upload trực tiếp từ trình duyệt.
+          </span>
+        </div>
+
+        <!-- Cấu hình Firebase Storage -->
+        <div id="section-firebase" style="display: none; background: rgba(27,67,50,.03); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+          <h3 style="font-size: 12px; font-weight: 600; color: var(--g1); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px;">Cấu hình Firebase Storage</h3>
+          <div>
+            <label style="font-size: 12px; color: rgba(27,67,50,.7); display: block; margin-bottom: 4px;">Storage Bucket Name</label>
+            <input type="text" id="cfg-firebase-bucket" placeholder="Ví dụ: ncttx-photobooth.appspot.com" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(27,67,50,.18); font-family: inherit; font-size: 13px; outline: none; color: var(--g1);" oninput="saveSettings()">
+          </div>
+          <span style="font-size: 11px; color: rgba(27,67,50,.5); display: block; margin-top: 8px; line-height: 1.4;">
+            * Lưu ý: Cần thiết lập Rule trong Firebase Storage cho phép ghi công khai (<code>allow write: if true;</code>) hoặc dùng cấu hình thích hợp.
+          </span>
+        </div>
+
+        <button onclick="testCloudUpload()" style="width: 100%; padding: 12px; background: var(--g2); color: white; border: none; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; margin-top: 10px;">
+          ⚡ Kiểm tra kết nối & Upload thử
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /main-app -->
 
 <div id="toast"></div>
@@ -446,6 +525,7 @@ function checkPass() {
     document.getElementById('main-app').style.display = 'block';
     initCodes();
     initFrames();
+    initSettings();
   } else {
     document.getElementById('pass-err').textContent = 'Mật khẩu không đúng.';
   }
@@ -571,11 +651,11 @@ function printCode(code) {
 <html><head>
 <meta charset="UTF-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,600;0,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   @page { size: 3.5in 1.5in landscape; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { width: 3.5in; height: 1.5in; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: white; }
+  body { width: 3.5in; height: 1.5in; font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: white; }
   .brand { font-size: 7.5pt; font-weight: 600; color: #1B4332; letter-spacing: 2px; text-transform: uppercase; }
   .line  { width: 75%; height: 0.5px; background: #1B4332; opacity: .2; }
   .code  { font-size: 26pt; font-weight: 700; color: #1B4332; letter-spacing: 5px; }
@@ -677,8 +757,80 @@ function stopAdminCam() {
   document.getElementById('cam-preview').style.display = 'none';
 }
 
+async function installDefaultFrames() {
+  const all = await fbAll();
+  const frames = all.filter(f => f.id.startsWith('frame_'));
+  if (frames.length > 0) return;
+
+  toast('Đang cấu hình các khung hình mặc định từ thư mục Frame...');
+
+  const defaultStrips = [
+    { name: 'Strip 1 (Classic)', path: 'Frame/STRIP/1.png' },
+    { name: 'Strip 2 (Retro)', path: 'Frame/STRIP/2.png' },
+    { name: 'Strip 3 (Youth)', path: 'Frame/STRIP/3.png' }
+  ];
+
+  const defaultGrids = [
+    { name: 'Grid 1 (Standard)', path: 'Frame/GRID/1.png' },
+    { name: 'Grid 2 (Classic)', path: 'Frame/GRID/2.png' },
+    { name: 'Grid 3 (Cozy)', path: 'Frame/GRID/3.png' },
+    { name: 'Grid 4 (Memory)', path: 'Frame/GRID/4.png' },
+    { name: 'Grid 5 (Warmth)', path: 'Frame/GRID/5.png' },
+    { name: 'Grid 6 (Vintage)', path: 'Frame/GRID/6.png' }
+  ];
+
+  const fetchAsDataURL = async (path) => {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`Could not fetch ${path}`);
+    const blob = await res.blob();
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  let count = 0;
+  for (let i = 0; i < defaultStrips.length; i++) {
+    try {
+      const item = defaultStrips[i];
+      const dataURL = await fetchAsDataURL(item.path);
+      const thumb = await makeThumbnail(dataURL);
+      const slotCount = await detectSlotCount(dataURL);
+      const id = `frame_default_strip_${i+1}`;
+      await fbPut({ id, name: item.name, dataURL, thumb, slotCount, layoutType: 'strip', uploadedAt: Date.now() });
+      count++;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  for (let i = 0; i < defaultGrids.length; i++) {
+    try {
+      const item = defaultGrids[i];
+      const dataURL = await fetchAsDataURL(item.path);
+      const thumb = await makeThumbnail(dataURL);
+      const slotCount = await detectSlotCount(dataURL);
+      const id = `frame_default_grid_${i+1}`;
+      await fbPut({ id, name: item.name, dataURL, thumb, slotCount, layoutType: 'grid', uploadedAt: Date.now() });
+      count++;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  if (count > 0) {
+    toast(`✓ Đã tự động cài đặt ${count} khung hình mặc định!`);
+  }
+}
+
 async function initFrames() {
   await openFbDB();
+  try {
+    await installDefaultFrames();
+  } catch (e) {
+    console.error('Lỗi khi cài đặt frame mặc định:', e);
+  }
   selectedGridIds  = [];
   selectedStripIds = [];
   activeWmId = localStorage.getItem('pb_watermark_id') || null;
@@ -924,6 +1076,117 @@ async function launchFrames() {
   setTimeout(() => {
     if (confirm('Mở trang photobooth ngay không?')) window.open('index.html', '_blank');
   }, 600);
+}
+
+/* ═══════════════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════════════ */
+function initSettings() {
+  const qrEnabled = localStorage.getItem('pb_qr_enabled') === 'true';
+  const qrPos = localStorage.getItem('pb_qr_position') || 'bottom-right';
+  const cloudProvider = localStorage.getItem('pb_cloud_provider') || 'none';
+  const cloudinaryName = localStorage.getItem('pb_cloudinary_cloud_name') || '';
+  const cloudinaryPreset = localStorage.getItem('pb_cloudinary_preset') || '';
+  const firebaseBucket = localStorage.getItem('pb_firebase_bucket') || '';
+  const redirectUrl = localStorage.getItem('pb_redirect_url') || '';
+
+  document.getElementById('cfg-qr-enabled').checked = qrEnabled;
+  document.getElementById('cfg-qr-position').value = qrPos;
+  document.getElementById('cfg-cloud-provider').value = cloudProvider;
+  document.getElementById('cfg-cloudinary-name').value = cloudinaryName;
+  document.getElementById('cfg-cloudinary-preset').value = cloudinaryPreset;
+  document.getElementById('cfg-firebase-bucket').value = firebaseBucket;
+  document.getElementById('cfg-redirect-url').value = redirectUrl;
+
+  toggleCloudFields();
+}
+
+function saveSettings() {
+  const qrEnabled = document.getElementById('cfg-qr-enabled').checked;
+  const qrPos = document.getElementById('cfg-qr-position').value;
+  const cloudProvider = document.getElementById('cfg-cloud-provider').value;
+  const cloudinaryName = document.getElementById('cfg-cloudinary-name').value.trim();
+  const cloudinaryPreset = document.getElementById('cfg-cloudinary-preset').value.trim();
+  const firebaseBucket = document.getElementById('cfg-firebase-bucket').value.trim();
+  const redirectUrl = document.getElementById('cfg-redirect-url').value.trim();
+
+  localStorage.setItem('pb_qr_enabled', qrEnabled);
+  localStorage.setItem('pb_qr_position', qrPos);
+  localStorage.setItem('pb_cloud_provider', cloudProvider);
+  localStorage.setItem('pb_cloudinary_cloud_name', cloudinaryName);
+  localStorage.setItem('pb_cloudinary_preset', cloudinaryPreset);
+  localStorage.setItem('pb_firebase_bucket', firebaseBucket);
+  localStorage.setItem('pb_redirect_url', redirectUrl);
+}
+
+function toggleCloudFields() {
+  const provider = document.getElementById('cfg-cloud-provider').value;
+  document.getElementById('section-cloudinary').style.display = provider === 'cloudinary' ? 'block' : 'none';
+  document.getElementById('section-firebase').style.display = provider === 'firebase' ? 'block' : 'none';
+}
+
+async function testCloudUpload() {
+  const provider = document.getElementById('cfg-cloud-provider').value;
+  if (provider === 'none') {
+    toast('Chưa chọn dịch vụ đám mây để kiểm tra.');
+    return;
+  }
+
+  // 1x1 transparent PNG pixel as test file
+  const testBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+  if (provider === 'cloudinary') {
+    const cloudName = document.getElementById('cfg-cloudinary-name').value.trim();
+    const preset = document.getElementById('cfg-cloudinary-preset').value.trim();
+    if (!cloudName || !preset) {
+      toast('Vui lòng điền đủ Cloud Name và Upload Preset.');
+      return;
+    }
+    toast('Đang upload thử lên Cloudinary...');
+    try {
+      const formData = new FormData();
+      formData.append('file', testBase64);
+      formData.append('upload_preset', preset);
+      formData.append('public_id', 'pb_test_connection');
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (res.ok && data.secure_url) {
+        toast('✓ Kết nối Cloudinary THÀNH CÔNG!');
+      } else {
+        toast('❌ Lỗi: ' + (data.error ? data.error.message : 'Không xác định'));
+      }
+    } catch (e) {
+      toast('❌ Lỗi kết nối Cloudinary: ' + e.message);
+    }
+  } else if (provider === 'firebase') {
+    const bucket = document.getElementById('cfg-firebase-bucket').value.trim();
+    if (!bucket) {
+      toast('Vui lòng điền Bucket Name.');
+      return;
+    }
+    toast('Đang upload thử lên Firebase Storage...');
+    try {
+      // Convert base64 to blob
+      const blob = await (await fetch(testBase64)).blob();
+      const res = await fetch(`https://firebasestorage.googleapis.com/v0/b/${bucket}/o/pb_test_connection.png`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'image/png' },
+        body: blob
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast('✓ Kết nối Firebase Storage THÀNH CÔNG!');
+      } else {
+        toast('❌ Lỗi Firebase: ' + (data.error ? data.error.message : 'Không xác định'));
+      }
+    } catch (e) {
+      toast('❌ Lỗi kết nối Firebase: ' + e.message);
+    }
+  }
 }
 </script>
 </body>

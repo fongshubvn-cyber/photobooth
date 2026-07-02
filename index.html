@@ -1134,7 +1134,13 @@ function backFromSelect() {
 
 function confirmSelection() {
   S.photos = S.selected.map(i => S.allPhotos[i]);
-  showPayGate();
+  const codeEnabled = localStorage.getItem('pb_code_enabled') !== 'false';
+  if (codeEnabled) {
+    showPayGate();
+  } else {
+    S.unlocked = true;
+    composeAndShow();
+  }
 }
 
 // ── PAY GATE ──────────────────────────────────

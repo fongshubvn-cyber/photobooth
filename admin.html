@@ -445,6 +445,15 @@
           <input type="checkbox" id="cfg-qr-enabled" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--g1);" onchange="saveSettings()">
         </div>
 
+        <!-- Yêu cầu nhập code -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-top: 1.5px solid rgba(27,67,50,.08); padding-top: 20px;">
+          <div style="padding-right: 12px;">
+            <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 2px; color: var(--g1);">Yêu cầu nhập mã code</label>
+            <span style="font-size: 12px; color: rgba(27,67,50,.5); display: block; line-height: 1.4;">Bắt buộc nhập mã code để chụp ảnh (tắt đi cho các sự kiện không cần thiết)</span>
+          </div>
+          <input type="checkbox" id="cfg-code-enabled" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--g1);" onchange="saveSettings()">
+        </div>
+
         <!-- Vị trí QR -->
         <div style="margin-bottom: 20px;">
           <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; color: var(--g1);">Vị trí hiển thị QR</label>
@@ -1083,6 +1092,7 @@ async function launchFrames() {
 ═══════════════════════════════════════════════ */
 function initSettings() {
   const qrEnabled = localStorage.getItem('pb_qr_enabled') === 'true';
+  const codeEnabled = localStorage.getItem('pb_code_enabled') !== 'false';
   const qrPos = localStorage.getItem('pb_qr_position') || 'bottom-right';
   const cloudProvider = localStorage.getItem('pb_cloud_provider') || 'none';
   const cloudinaryName = localStorage.getItem('pb_cloudinary_cloud_name') || '';
@@ -1091,6 +1101,7 @@ function initSettings() {
   const redirectUrl = localStorage.getItem('pb_redirect_url') || '';
 
   document.getElementById('cfg-qr-enabled').checked = qrEnabled;
+  document.getElementById('cfg-code-enabled').checked = codeEnabled;
   document.getElementById('cfg-qr-position').value = qrPos;
   document.getElementById('cfg-cloud-provider').value = cloudProvider;
   document.getElementById('cfg-cloudinary-name').value = cloudinaryName;
@@ -1103,6 +1114,7 @@ function initSettings() {
 
 function saveSettings() {
   const qrEnabled = document.getElementById('cfg-qr-enabled').checked;
+  const codeEnabled = document.getElementById('cfg-code-enabled').checked;
   const qrPos = document.getElementById('cfg-qr-position').value;
   const cloudProvider = document.getElementById('cfg-cloud-provider').value;
   const cloudinaryName = document.getElementById('cfg-cloudinary-name').value.trim();
@@ -1111,6 +1123,7 @@ function saveSettings() {
   const redirectUrl = document.getElementById('cfg-redirect-url').value.trim();
 
   localStorage.setItem('pb_qr_enabled', qrEnabled);
+  localStorage.setItem('pb_code_enabled', codeEnabled);
   localStorage.setItem('pb_qr_position', qrPos);
   localStorage.setItem('pb_cloud_provider', cloudProvider);
   localStorage.setItem('pb_cloudinary_cloud_name', cloudinaryName);

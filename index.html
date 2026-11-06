@@ -237,6 +237,58 @@
     .pg-qr img{width:100%;height:100%;object-fit:contain}
     .pg-qr-placeholder{text-align:center;color:#888;font-size:11px;line-height:1.7}
     .pg-qr-info{font-size:12px;color:rgba(255,255,255,.5);text-align:center;line-height:1.65}
+
+    /* ══ GUIDE POPUP ═══════════════════════ */
+    .guide-open-btn{margin-top:14px;padding:9px 22px;background:rgba(27,67,50,.07);border:1.5px solid rgba(27,67,50,.2);border-radius:100px;color:var(--g1);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .2s;-webkit-tap-highlight-color:transparent}
+    .guide-open-btn:hover{background:rgba(27,67,50,.14);transform:translateY(-1px)}
+    #guide-modal{position:fixed;inset:0;background:rgba(10,22,16,.76);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;z-index:1100;padding:18px}
+    #guide-modal.open{display:flex}
+    .gm-card{position:relative;width:100%;max-width:520px;max-height:90vh;background:var(--cream);border:1.5px solid rgba(27,67,50,.15);border-radius:26px;box-shadow:0 24px 64px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden;color:var(--g1);animation:gmPop .28s cubic-bezier(.22,1,.36,1)}
+    @keyframes gmPop{from{opacity:0;transform:scale(.93) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .gm-head{background:var(--g1);color:white;padding:20px 24px 16px;text-align:center;position:relative;flex-shrink:0}
+    .gm-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:white;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+    .gm-close:hover{background:rgba(255,255,255,.22)}
+    .gm-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);background:rgba(201,150,58,.16);border:1px solid rgba(201,150,58,.35);padding:3px 11px;border-radius:100px;margin-bottom:6px}
+    .gm-title{font-size:19px;font-weight:700;letter-spacing:-.2px}
+    .gm-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:3px}
+    .gm-body{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:11px;flex:1}
+    .gm-body::-webkit-scrollbar{width:5px}
+    .gm-body::-webkit-scrollbar-thumb{background:rgba(27,67,50,.2);border-radius:10px}
+    .gm-step{display:flex;align-items:center;gap:14px;background:white;border:1px solid rgba(27,67,50,.1);border-radius:16px;padding:11px 13px;box-shadow:0 2px 8px rgba(27,67,50,.04)}
+    .gm-illus{width:76px;height:66px;border-radius:12px;background:#EDEAE3;border:1px solid rgba(27,67,50,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:6px}
+    .gm-info{flex:1;min-width:0}
+    .gm-step-tag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+    .gm-step-num{width:17px;height:17px;border-radius:50%;background:var(--g1);color:white;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+    .gm-step-title{font-size:13.5px;font-weight:700;color:var(--g1);margin-bottom:2px}
+    .gm-step-desc{font-size:11.5px;color:rgba(27,67,50,.72);line-height:1.45}
+    .gm-step-desc strong{color:var(--g1);font-weight:600}
+    .gm-foot{padding:14px 20px 18px;background:white;border-top:1px solid rgba(27,67,50,.08);display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}
+    .gm-start-btn{width:100%;padding:14px;background:var(--g1);color:var(--cream);border:none;border-radius:100px;font-family:inherit;font-size:15.5px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 6px 18px rgba(27,67,50,.22);-webkit-tap-highlight-color:transparent}
+    .gm-start-btn:hover{background:var(--g2);transform:translateY(-1px)}
+
+    /* Mini illustrations inside guide */
+    .il-layouts{display:flex;gap:6px;align-items:center}
+    .il-grid{width:28px;height:36px;background:var(--g1);border-radius:4px;padding:3px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;box-shadow:0 2px 5px rgba(0,0,0,.15)}
+    .il-grid span,.il-strip span{background:rgba(255,255,255,.75);border-radius:1.5px;display:block}
+    .il-strip{width:18px;height:40px;background:white;border:1.5px solid var(--g1);border-radius:4px;padding:2.5px;display:grid;grid-template-rows:repeat(3,1fr);gap:2px}
+    .il-strip span{background:rgba(27,67,50,.35)}
+    .il-style{display:flex;flex-direction:column;align-items:center;gap:5px}
+    .il-frame-card{width:34px;height:32px;background:white;border:2px solid var(--g1);border-radius:5px;padding:3px;display:grid;grid-template-columns:1fr 1fr;gap:2px;position:relative}
+    .il-frame-card span{background:rgba(82,183,136,.35);border-radius:1px}
+    .il-swatches{display:flex;gap:3px}
+    .il-swatches i{width:10px;height:10px;border-radius:50%;display:block;border:1px solid white;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+    .il-cam{display:flex;flex-direction:column;align-items:center;gap:4px}
+    .il-cd{font-size:16px;font-weight:800;color:var(--g1);line-height:1;background:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--gold);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+    .il-shutter{width:18px;height:18px;border-radius:50%;background:white;border:3px solid var(--g1)}
+    .il-select{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%}
+    .il-sel-row{display:flex;gap:3px}
+    .il-sel-item{width:18px;height:15px;border-radius:3px;background:var(--g1);color:white;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--g3)}
+    .il-code-pill{background:white;border:1.5px dashed var(--gold);border-radius:4px;padding:1px 6px;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--g1)}
+    .il-qr-res{display:flex;align-items:center;gap:5px}
+    .il-photo-done{width:32px;height:44px;background:white;border:1.5px solid var(--g1);border-radius:4px;padding:3px;display:flex;flex-direction:column;justify-content:space-between;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+    .il-photo-slots{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;flex:1;margin-bottom:2px}
+    .il-photo-slots span{background:rgba(27,67,50,.25);border-radius:1px}
+    .il-qr-mini{width:11px;height:11px;background:var(--g1);border-radius:1.5px;align-self:flex-end;background-image:radial-gradient(white 25%,transparent 26%);background-size:4px 4px}
   </style>
 </head>
 <body>
@@ -279,6 +331,7 @@
     </div>
 
     <button class="start-btn" onclick="goToPick()">Chọn phong cách →</button>
+    <button class="guide-open-btn" onclick="openGuide()">📖 Hướng dẫn sử dụng</button>
   </div>
   <div class="home-foot">Lưu giữ ký ức · Quán của Thời Thanh Xuân</div>
 </div>
@@ -1422,7 +1475,119 @@ function updateCloudStatus(status, errMsg = '') {
   }
 }
 
+function openGuide() {
+  document.getElementById('guide-modal').classList.add('open');
+}
+function closeGuide() {
+  document.getElementById('guide-modal').classList.remove('open');
+}
+
 </script>
+
+<!-- ══ GUIDE MODAL OVERLAY ══════════════════════ -->
+<div id="guide-modal" class="open" onclick="if(event.target===this)closeGuide()">
+  <div class="gm-card">
+    <div class="gm-head">
+      <button class="gm-close" onclick="closeGuide()" aria-label="Đóng">✕</button>
+      <div class="gm-badge">Nhà của Thời Thanh Xuân</div>
+      <div class="gm-title">Hướng dẫn chụp Photobooth</div>
+      <div class="gm-sub">5 bước đơn giản để lưu giữ khoảnh khắc kỷ niệm</div>
+    </div>
+
+    <div class="gm-body">
+      <!-- Bước 1 -->
+      <div class="gm-step">
+        <div class="gm-illus">
+          <div class="il-layouts">
+            <div class="il-grid"><span></span><span></span><span></span><span></span></div>
+            <div class="il-strip"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+        <div class="gm-info">
+          <div class="gm-step-tag"><span class="gm-step-num">1</span> Bước 1</div>
+          <div class="gm-step-title">Chọn kiểu bố cục ảnh</div>
+          <div class="gm-step-desc">Chọn chụp <strong>Ảnh lưới</strong> (2, 4, 6 ảnh) hoặc <strong>Ảnh dọc Strip</strong> (2, 3 ảnh) rồi nhấn <strong>Chọn phong cách →</strong></div>
+        </div>
+      </div>
+
+      <!-- Bước 2 -->
+      <div class="gm-step">
+        <div class="gm-illus">
+          <div class="il-style">
+            <div class="il-frame-card"><span></span><span></span><span></span><span></span></div>
+            <div class="il-swatches">
+              <i style="background:#F0C8A0"></i>
+              <i style="background:#E8A830"></i>
+              <i style="background:#F0A0B8"></i>
+              <i style="background:#555"></i>
+            </div>
+          </div>
+        </div>
+        <div class="gm-info">
+          <div class="gm-step-tag"><span class="gm-step-num">2</span> Bước 2</div>
+          <div class="gm-step-title">Chọn khung hình & Tông màu da</div>
+          <div class="gm-step-desc">Lựa chọn <strong>Kiểu khung</strong> và <strong>Tông màu da</strong> (Sáng Da, Hoàng Hôn, Hồng Ngọc, Điện Ảnh...) rồi nhấn <strong>Bắt đầu chụp →</strong></div>
+        </div>
+      </div>
+
+      <!-- Bước 3 -->
+      <div class="gm-step">
+        <div class="gm-illus">
+          <div class="il-cam">
+            <div class="il-cd">3s</div>
+            <div class="il-shutter"></div>
+          </div>
+        </div>
+        <div class="gm-info">
+          <div class="gm-step-tag"><span class="gm-step-num">3</span> Bước 3</div>
+          <div class="gm-step-title">Tạo dáng & Chụp tự động</div>
+          <div class="gm-step-desc">Nhấn <strong>nút tròn trắng</strong> để bắt đầu. Máy sẽ tự động <strong>đếm ngược 3 giây</strong> cho mỗi tấm (chụp dư 2 tấm để bạn thoải mái lựa chọn).</div>
+        </div>
+      </div>
+
+      <!-- Bước 4 -->
+      <div class="gm-step">
+        <div class="gm-illus">
+          <div class="il-select">
+            <div class="il-sel-row">
+              <div class="il-sel-item">1</div>
+              <div class="il-sel-item">2</div>
+              <div class="il-sel-item">3</div>
+            </div>
+            <div class="il-code-pill">NCTTX***</div>
+          </div>
+        </div>
+        <div class="gm-info">
+          <div class="gm-step-tag"><span class="gm-step-num">4</span> Bước 4</div>
+          <div class="gm-step-title">Chọn ảnh đẹp nhất & Nhập mã</div>
+          <div class="gm-step-desc">Chạm chọn đủ số ảnh ưng ý nhất theo thứ tự, nhấn <strong>Tiếp theo →</strong> và nhập <strong>Mã chụp ảnh</strong> (nhận tại <strong>Khu vực tính tiền</strong>).</div>
+        </div>
+      </div>
+
+      <!-- Bước 5 -->
+      <div class="gm-step">
+        <div class="gm-illus">
+          <div class="il-qr-res">
+            <div class="il-photo-done">
+              <div class="il-photo-slots"><span></span><span></span><span></span><span></span></div>
+              <div class="il-qr-mini"></div>
+            </div>
+            <span style="font-size:18px">📱🖨️</span>
+          </div>
+        </div>
+        <div class="gm-info">
+          <div class="gm-step-tag"><span class="gm-step-num">5</span> Bước cuối</div>
+          <div class="gm-step-title">Quét QR tải ảnh & In kỷ niệm</div>
+          <div class="gm-step-desc">Dùng điện thoại <strong>quét mã QR trên góc ảnh</strong> để tải file chất lượng cao, có thể <strong>✦ Đổi khung</strong> lại tùy thích hoặc nhấn <strong>In ảnh</strong>!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gm-foot">
+      <button class="gm-start-btn" onclick="closeGuide()">Đã hiểu · Bắt đầu chụp ngay →</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ PAY GATE OVERLAY ═════════════════════════ -->
 <div id="pay-gate">

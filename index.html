@@ -1513,7 +1513,10 @@ function startFromWelcome() {
   openGuide();
 }
 function openGuide() {
-  document.getElementById('guide-modal').classList.add('open');
+  const modal = document.getElementById('guide-modal');
+  modal.classList.add('open');
+  const body = modal.querySelector('.gm-body');
+  if (body) body.scrollTop = 0;
 }
 function closeGuide() {
   document.getElementById('guide-modal').classList.remove('open');

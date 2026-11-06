@@ -646,7 +646,7 @@ const framePathMap = {
 };
 
 async function loadActiveFrames() {
-  if (localStorage.getItem('pb_qr_enabled') === 'true') {
+  if (localStorage.getItem('pb_qr_enabled') !== 'false') {
     loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js')
       .catch(() => console.warn('Không thể tải thư viện QR Code.'));
   }
@@ -1052,7 +1052,7 @@ async function compose() {
   }
 
   // Draw QR Code if enabled and cloud URL is available
-  if (localStorage.getItem('pb_qr_enabled') === 'true' && S.currentCloudURL) {
+  if (localStorage.getItem('pb_qr_enabled') !== 'false' && S.currentCloudURL) {
     await drawQRCodeOnCanvas(ctx, S.currentCloudURL, canvas.width, canvas.height);
   }
 
@@ -1350,9 +1350,9 @@ function loadScript(src) {
 }
 
 function setupCloudURL() {
-  const qrEnabled = localStorage.getItem('pb_qr_enabled') === 'true';
-  const provider = localStorage.getItem('pb_cloud_provider') || 'none';
-  const redirectUrl = localStorage.getItem('pb_redirect_url') || '';
+  const qrEnabled = localStorage.getItem('pb_qr_enabled') !== 'false';
+  const provider = localStorage.getItem('pb_cloud_provider') || 'cloudinary';
+  const redirectUrl = localStorage.getItem('pb_redirect_url') || 'https://fongshubvn-cyber.github.io/photobooth/download.html';
   
   if (!qrEnabled || provider === 'none') {
     S.currentPhotoId = null;
@@ -1364,7 +1364,7 @@ function setupCloudURL() {
   
   let directURL = '';
   if (provider === 'cloudinary') {
-    const cloudName = localStorage.getItem('pb_cloudinary_cloud_name') || '';
+    const cloudName = localStorage.getItem('pb_cloudinary_cloud_name') || 'wiloazr2';
     if (cloudName) {
       directURL = `https://res.cloudinary.com/${cloudName}/image/upload/${S.currentPhotoId}.jpg`;
       if (redirectUrl) {
@@ -1453,8 +1453,8 @@ async function drawQRCodeOnCanvas(ctx, url, canvasW, canvasH) {
 }
 
 async function uploadPhotoToCloud() {
-  const qrEnabled = localStorage.getItem('pb_qr_enabled') === 'true';
-  const provider = localStorage.getItem('pb_cloud_provider') || 'none';
+  const qrEnabled = localStorage.getItem('pb_qr_enabled') !== 'false';
+  const provider = localStorage.getItem('pb_cloud_provider') || 'cloudinary';
   
   if (!qrEnabled || provider === 'none' || !S.currentPhotoId || !S.finalURL) {
     return;
@@ -1464,8 +1464,8 @@ async function uploadPhotoToCloud() {
   
   try {
     if (provider === 'cloudinary') {
-      const cloudName = localStorage.getItem('pb_cloudinary_cloud_name') || '';
-      const preset = localStorage.getItem('pb_cloudinary_preset') || '';
+      const cloudName = localStorage.getItem('pb_cloudinary_cloud_name') || 'wiloazr2';
+      const preset = localStorage.getItem('pb_cloudinary_preset') || 'photobooth_preset';
       
       const formData = new FormData();
       formData.append('file', S.finalURL);
@@ -1515,8 +1515,8 @@ function updateCloudStatus(status, errMsg = '') {
   
   if (!badge) return;
   
-  const qrEnabled = localStorage.getItem('pb_qr_enabled') === 'true';
-  const provider = localStorage.getItem('pb_cloud_provider') || 'none';
+  const qrEnabled = localStorage.getItem('pb_qr_enabled') !== 'false';
+  const provider = localStorage.getItem('pb_cloud_provider') || 'cloudinary';
   if (!qrEnabled || provider === 'none') {
     badge.style.display = 'none';
     return;

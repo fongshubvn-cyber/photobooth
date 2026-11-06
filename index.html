@@ -404,7 +404,7 @@ const S = {
   photos: [], allPhotos: [], selected: [],
   stream: null, busy: false, finalURL: null, unlocked: false
 };
-const DB_URL = 'https://ncttx-photobooth-default-rtdb.asia-southeast1.firebasedatabase.app';
+const DB_URL = 'https://ncttx-photobooth-fb20d-default-rtdb.asia-southeast1.firebasedatabase.app';
 
 // ── FILTERS ───────────────────────────────────
 const VIDEO_FILTERS = {
@@ -548,14 +548,36 @@ async function getFrameData(id) {
 }
 const frameSlotMap = {};
 const frameLayoutMap = {};
+const framePathMap = {
+  frame_default_grid_1: 'frame/grid/1.png',
+  frame_default_grid_2: 'frame/grid/2.png',
+  frame_default_grid_3: 'frame/grid/3.png',
+  frame_default_grid_4: 'frame/grid/4.png',
+  frame_default_grid_5: 'frame/grid/5.png',
+  frame_default_grid_6: 'frame/grid/6.png',
+  frame_default_strip_1: 'frame/strip/1.png',
+  frame_default_strip_2: 'frame/strip/2.png',
+  frame_default_strip_3: 'frame/strip/3.png'
+};
 
 async function loadActiveFrames() {
   if (localStorage.getItem('pb_qr_enabled') === 'true') {
     loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js')
       .catch(() => console.warn('Không thể tải thư viện QR Code.'));
   }
-  const meta = JSON.parse(localStorage.getItem('pb_frames') || '[]');
-  if (meta.length === 0) return;
+  let meta = JSON.parse(localStorage.getItem('pb_frames') || '[]');
+  if (meta.length === 0) {
+    meta = [
+      { id: 'frame_default_grid_1', name: 'Grid 1 (Standard)', thumb: 'frame/grid/1.png', slotCount: 0, layoutType: 'grid' },
+      { id: 'frame_default_grid_2', name: 'Grid 2 (Classic)',  thumb: 'frame/grid/2.png', slotCount: 0, layoutType: 'grid' },
+      { id: 'frame_default_grid_3', name: 'Grid 3 (Cozy)',     thumb: 'frame/grid/3.png', slotCount: 0, layoutType: 'grid' },
+      { id: 'frame_default_grid_4', name: 'Grid 4 (Memory)',   thumb: 'frame/grid/4.png', slotCount: 0, layoutType: 'grid' },
+      { id: 'frame_default_grid_5', name: 'Grid 5 (Warmth)',   thumb: 'frame/grid/5.png', slotCount: 0, layoutType: 'grid' },
+      { id: 'frame_default_strip_1', name: 'Strip 1 (Classic)', thumb: 'frame/strip/1.png', slotCount: 0, layoutType: 'strip' },
+      { id: 'frame_default_strip_2', name: 'Strip 2 (Retro)',   thumb: 'frame/strip/2.png', slotCount: 0, layoutType: 'strip' },
+      { id: 'frame_default_strip_3', name: 'Strip 3 (Youth)',   thumb: 'frame/strip/3.png', slotCount: 0, layoutType: 'strip' }
+    ];
+  }
 
   // Build slot count + layout type maps
   meta.forEach(f => {
@@ -637,9 +659,9 @@ const frameCache = {};
 async function getFrame(id) {
   if (frameCache[id]) return frameCache[id];
   const record = await getFrameData(id);
-  const src = (record && record.dataURL) ? record.dataURL : `frames/${id}.png`;
+  const src = (record && record.dataURL) ? record.dataURL : (framePathMap[id] || `frame/grid/1.png`);
   const img = await loadImg(src);
-  const slots = detectSlots(img);
+  const slots = img ? detectSlots(img) : [];
   frameCache[id] = { img, slots };
   return frameCache[id];
 }
@@ -670,7 +692,9 @@ function selectFilter(f, btn, ctx) {
 function syncPickSelections() {
   // Keep pick panel in sync with current S.frame/filter
   document.getElementById('pick-frame-grid').querySelectorAll('.frame-card').forEach(b => {
-    b.classList.toggle('sel', b.querySelector('.fc-inner').classList.contains('fc-' + S.frame));
+    const inner = b.querySelector('.fc-inner');
+    const match = b.dataset.frameId ? (b.dataset.frameId === S.frame) : (inner && inner.classList.contains('fc-' + S.frame));
+    b.classList.toggle('sel', match);
   });
   document.getElementById('pick-filter-row').querySelectorAll('.sw-card').forEach((b, i) => {
     const keys = Object.keys(VIDEO_FILTERS);
@@ -1022,7 +1046,10 @@ function toggleRepick() {
 function syncRepickPanel() {
   const frames = document.querySelector('.rp-frames');
   const frameKeys = ['classic','film','blush','sage','plum'];
-  frames.querySelectorAll('.frame-card').forEach((b,i) => b.classList.toggle('sel', frameKeys[i] === S.frame));
+  frames.querySelectorAll('.frame-card').forEach((b,i) => {
+    const match = b.dataset.frameId ? (b.dataset.frameId === S.frame) : (frameKeys[i] === S.frame);
+    b.classList.toggle('sel', match);
+  });
   const filters = document.querySelector('.rp-filters');
   const filterKeys = Object.keys(VIDEO_FILTERS);
   filters.querySelectorAll('.sw-card').forEach((b,i) => b.classList.toggle('sel', filterKeys[i] === S.filter));

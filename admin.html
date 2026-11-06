@@ -567,7 +567,7 @@ function toast(msg) {
 /* ═══════════════════════════════════════════════
    TAB 1 — MÃ CODE  (Firebase)
 ═══════════════════════════════════════════════ */
-const DB_URL = 'https://ncttx-photobooth-default-rtdb.asia-southeast1.firebasedatabase.app';
+const DB_URL = 'https://ncttx-photobooth-fb20d-default-rtdb.asia-southeast1.firebasedatabase.app';
 const CHARS  = 'ABCDEFGHJKLMNPQRSTVWXYZ23456789';
 let lastCode = null;
 
@@ -774,18 +774,18 @@ async function installDefaultFrames() {
   toast('Đang cấu hình các khung hình mặc định từ thư mục Frame...');
 
   const defaultStrips = [
-    { name: 'Strip 1 (Classic)', path: 'Frame/STRIP/1.png' },
-    { name: 'Strip 2 (Retro)', path: 'Frame/STRIP/2.png' },
-    { name: 'Strip 3 (Youth)', path: 'Frame/STRIP/3.png' }
+    { name: 'Strip 1 (Classic)', path: 'frame/strip/1.png' },
+    { name: 'Strip 2 (Retro)', path: 'frame/strip/2.png' },
+    { name: 'Strip 3 (Youth)', path: 'frame/strip/3.png' }
   ];
 
   const defaultGrids = [
-    { name: 'Grid 1 (Standard)', path: 'Frame/GRID/1.png' },
-    { name: 'Grid 2 (Classic)', path: 'Frame/GRID/2.png' },
-    { name: 'Grid 3 (Cozy)', path: 'Frame/GRID/3.png' },
-    { name: 'Grid 4 (Memory)', path: 'Frame/GRID/4.png' },
-    { name: 'Grid 5 (Warmth)', path: 'Frame/GRID/5.png' },
-    { name: 'Grid 6 (Vintage)', path: 'Frame/GRID/6.png' }
+    { name: 'Grid 1 (Standard)', path: 'frame/grid/1.png' },
+    { name: 'Grid 2 (Classic)', path: 'frame/grid/2.png' },
+    { name: 'Grid 3 (Cozy)', path: 'frame/grid/3.png' },
+    { name: 'Grid 4 (Memory)', path: 'frame/grid/4.png' },
+    { name: 'Grid 5 (Warmth)', path: 'frame/grid/5.png' },
+    { name: 'Grid 6 (Vintage)', path: 'frame/grid/6.png' }
   ];
 
   const fetchAsDataURL = async (path) => {

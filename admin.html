@@ -830,6 +830,17 @@ async function installDefaultFrames() {
 
   if (count > 0) {
     toast(`✓ Đã tự động cài đặt ${count} khung hình mặc định!`);
+    // Tự động kích hoạt bộ khung mặc định nếu chưa có pb_frames
+    if (!localStorage.getItem('pb_frames')) {
+      const updatedAll = await fbAll();
+      const defGrids = updatedAll.filter(f => (f.layoutType || 'grid') === 'grid').slice(0, 5);
+      const defStrips = updatedAll.filter(f => f.layoutType === 'strip').slice(0, 5);
+      const active = [...defGrids, ...defStrips];
+      localStorage.setItem('pb_active', JSON.stringify(active.map(f => f.id)));
+      localStorage.setItem('pb_frames', JSON.stringify(
+        active.map(f => ({ id: f.id, name: f.name, thumb: f.thumb, slotCount: f.slotCount || 0, layoutType: f.layoutType || 'grid' }))
+      ));
+    }
   }
 }
 
@@ -840,8 +851,10 @@ async function initFrames() {
   } catch (e) {
     console.error('Lỗi khi cài đặt frame mặc định:', e);
   }
-  selectedGridIds  = [];
-  selectedStripIds = [];
+  const savedActive = JSON.parse(localStorage.getItem('pb_active') || '[]');
+  const allLoaded = await fbAll();
+  selectedGridIds  = savedActive.filter(id => allLoaded.some(f => f.id === id && (f.layoutType || 'grid') === 'grid')).slice(0, MAX_SEL);
+  selectedStripIds = savedActive.filter(id => allLoaded.some(f => f.id === id && f.layoutType === 'strip')).slice(0, MAX_SEL);
   activeWmId = localStorage.getItem('pb_watermark_id') || null;
   // Restore resolution selection
   const savedW = localStorage.getItem('pb_cam_w') || '1920';

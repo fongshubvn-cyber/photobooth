@@ -60,6 +60,21 @@
     .home-foot{position:absolute;bottom:24px;font-size:12px;color:var(--g1);opacity:.45;letter-spacing:1px;display:flex;align-items:center;gap:8px}
     .ver-badge{padding:2px 8px;border-radius:100px;background:rgba(27,67,50,.1);border:1px solid rgba(27,67,50,.2);font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--g1)}
 
+    /* Welcome Hero Start Button with Logo */
+    #home-welcome,#home-choose{display:flex;flex-direction:column;align-items:center;width:100%;animation:fadeUp .32s ease}
+    #home-choose{display:none}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .welcome-sub{font-size:13.5px;color:var(--g1);opacity:.65;margin-bottom:32px;letter-spacing:.4px}
+    .hero-start-btn{display:inline-flex;align-items:center;gap:16px;padding:12px 38px 12px 14px;background:var(--g1);color:var(--cream);border:2px solid rgba(201,150,58,.45);border-radius:100px;font-family:inherit;cursor:pointer;transition:all .25s ease;box-shadow:0 14px 36px rgba(27,67,50,.26),0 0 0 8px rgba(27,67,50,.07);-webkit-tap-highlight-color:transparent;animation:heroPulse 2.6s infinite ease-in-out}
+    .hero-start-btn:hover{background:var(--g2);transform:scale(1.04);box-shadow:0 18px 42px rgba(27,67,50,.32),0 0 0 10px rgba(27,67,50,.1)}
+    .hero-start-btn:active{transform:scale(.97)}
+    @keyframes heroPulse{0%,100%{box-shadow:0 14px 36px rgba(27,67,50,.26),0 0 0 6px rgba(27,67,50,.06)}50%{box-shadow:0 16px 40px rgba(27,67,50,.34),0 0 0 13px rgba(27,67,50,.11)}}
+    .hero-btn-logo{width:54px;height:54px;border-radius:50%;background:var(--cream);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;padding:7px;flex-shrink:0;overflow:hidden}
+    .hero-btn-logo img{width:100%;height:100%;object-fit:contain}
+    .hero-btn-text{display:flex;flex-direction:column;align-items:flex-start;text-align:left}
+    .hero-btn-main{font-size:20px;font-weight:700;letter-spacing:.5px;color:var(--cream);line-height:1.2}
+    .hero-btn-sub{font-size:11px;font-weight:400;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+
     /* ══ PICK ══════════════════════════════ */
     #screen-pick{background:#0a0a0a;justify-content:flex-end;padding:0}
     #pick-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);transition:filter .3s ease}
@@ -302,37 +317,53 @@
     <div class="brand-name">Quán của Thời<br>Thanh Xuân</div>
     <div class="brand-loc">Đà Lạt</div>
     <div class="hr"></div>
-    <div class="choose-label">Chọn kiểu chụp</div>
 
-    <div class="layout-grid">
-      <button class="lopt" data-count="2" data-layout="grid" onclick="selectLayout(2,'grid',this)">
-        <div class="lopt-icon g21"><span></span><span></span></div>
-        <span class="lopt-txt">2 ảnh lưới</span>
-      </button>
-      <button class="lopt sel" data-count="4" data-layout="grid" onclick="selectLayout(4,'grid',this)">
-        <div class="lopt-icon g22"><span></span><span></span><span></span><span></span></div>
-        <span class="lopt-txt">4 ảnh lưới</span>
-      </button>
-      <button class="lopt" data-count="6" data-layout="grid" onclick="selectLayout(6,'grid',this)">
-        <div class="lopt-icon g23"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <span class="lopt-txt">6 ảnh lưới</span>
-      </button>
-      <button class="lopt" data-count="2" data-layout="strip" onclick="selectLayout(2,'strip',this)">
-        <div class="lopt-icon s12"><span></span><span></span></div>
-        <span class="lopt-txt">2 ảnh dọc</span>
-      </button>
-      <button class="lopt" data-count="3" data-layout="strip" onclick="selectLayout(3,'strip',this)">
-        <div class="lopt-icon s13"><span></span><span></span><span></span></div>
-        <span class="lopt-txt">3 ảnh dọc</span>
-      </button>
-      <button class="lopt" data-count="6" data-layout="strip" onclick="selectLayout(6,'strip',this)">
-        <div class="lopt-icon s16"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <span class="lopt-txt">6 ảnh dọc</span>
+    <!-- Bước mở đầu: Nút Bắt đầu có Logo -->
+    <div id="home-welcome">
+      <div class="welcome-sub">Chạm để bắt đầu lưu giữ khoảnh khắc kỷ niệm</div>
+      <button class="hero-start-btn" onclick="startFromWelcome()">
+        <div class="hero-btn-logo"><img src="assets/ncttx-logo.png" alt="Logo NCTTX"></div>
+        <div class="hero-btn-text">
+          <span class="hero-btn-main">BẮT ĐẦU →</span>
+          <span class="hero-btn-sub">Photobooth Kỷ Niệm</span>
+        </div>
       </button>
     </div>
 
-    <button class="start-btn" onclick="goToPick()">Chọn phong cách →</button>
-    <button class="guide-open-btn" onclick="openGuide()">📖 Hướng dẫn sử dụng</button>
+    <!-- Bước chọn kiểu chụp (Hiện sau khi xem Popup hướng dẫn) -->
+    <div id="home-choose">
+      <div class="choose-label">Chọn kiểu chụp</div>
+
+      <div class="layout-grid">
+        <button class="lopt" data-count="2" data-layout="grid" onclick="selectLayout(2,'grid',this)">
+          <div class="lopt-icon g21"><span></span><span></span></div>
+          <span class="lopt-txt">2 ảnh lưới</span>
+        </button>
+        <button class="lopt sel" data-count="4" data-layout="grid" onclick="selectLayout(4,'grid',this)">
+          <div class="lopt-icon g22"><span></span><span></span><span></span><span></span></div>
+          <span class="lopt-txt">4 ảnh lưới</span>
+        </button>
+        <button class="lopt" data-count="6" data-layout="grid" onclick="selectLayout(6,'grid',this)">
+          <div class="lopt-icon g23"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <span class="lopt-txt">6 ảnh lưới</span>
+        </button>
+        <button class="lopt" data-count="2" data-layout="strip" onclick="selectLayout(2,'strip',this)">
+          <div class="lopt-icon s12"><span></span><span></span></div>
+          <span class="lopt-txt">2 ảnh dọc</span>
+        </button>
+        <button class="lopt" data-count="3" data-layout="strip" onclick="selectLayout(3,'strip',this)">
+          <div class="lopt-icon s13"><span></span><span></span><span></span></div>
+          <span class="lopt-txt">3 ảnh dọc</span>
+        </button>
+        <button class="lopt" data-count="6" data-layout="strip" onclick="selectLayout(6,'strip',this)">
+          <div class="lopt-icon s16"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <span class="lopt-txt">6 ảnh dọc</span>
+        </button>
+      </div>
+
+      <button class="start-btn" onclick="goToPick()">Chọn phong cách →</button>
+      <button class="guide-open-btn" onclick="openGuide()">📖 Hướng dẫn sử dụng</button>
+    </div>
   </div>
   <div class="home-foot"><span>Lưu giữ ký ức · Quán của Thời Thanh Xuân</span><span class="ver-badge">V.102</span></div>
 </div>
@@ -1133,6 +1164,8 @@ function goHome() {
   S.currentPhotoId=null; S.currentCloudURL=null;
   const badge = document.getElementById('cloud-status-badge');
   if (badge) badge.style.display = 'none';
+  document.getElementById('home-welcome').style.display = 'flex';
+  document.getElementById('home-choose').style.display = 'none';
   show('home');
 }
 
@@ -1476,17 +1509,22 @@ function updateCloudStatus(status, errMsg = '') {
   }
 }
 
+function startFromWelcome() {
+  openGuide();
+}
 function openGuide() {
   document.getElementById('guide-modal').classList.add('open');
 }
 function closeGuide() {
   document.getElementById('guide-modal').classList.remove('open');
+  document.getElementById('home-welcome').style.display = 'none';
+  document.getElementById('home-choose').style.display = 'flex';
 }
 
 </script>
 
 <!-- ══ GUIDE MODAL OVERLAY ══════════════════════ -->
-<div id="guide-modal" class="open" onclick="if(event.target===this)closeGuide()">
+<div id="guide-modal" onclick="if(event.target===this)closeGuide()">
   <div class="gm-card">
     <div class="gm-head">
       <button class="gm-close" onclick="closeGuide()" aria-label="Đóng">✕</button>
